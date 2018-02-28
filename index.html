@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Modify Features</title>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.4/css/ol.css" type="text/css">
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://openlayers.org/en/v4.6.4/build/ol.js"></script>
+    <button id="Bilkent">To Bilkent</button>
+  </head>
+  <body>
+    
+    <div id="status"></div>
+    <div id="map" class="map"></div>
+    
+    <script>
+     
+     var fenFakHavuz = ol.proj.fromLonLat([32.748428,39.86800]);
+
+     var view = new ol.View({//start view
+       center : fenFakHavuz,
+       zoom : 16
+     })
+
+     var raster = new ol.layer.Tile({//main map
+        source: new ol.source.OSM()
+      });
+
+
+
+
+      var vector = new ol.layer.Vector({//geojson vectors
+        source: new ol.source.Vector({
+          url: 'https://raw.githubusercontent.com/Dogacel/teamazm-cs102/Map_Geojson/map.geojson?token=AdZqbDQ-pKLmg5nUH_xDcJzhz1Unm8aIks5anqQDwA%3D%3D',
+          format: new ol.format.GeoJSON()
+        })
+      });
+
+      //create map from raster and vector layers
+      var map = new ol.Map({
+        //interactions : ol.interaction.defaults().extend([select]),
+        layers: [raster, vector],
+        target: 'map',
+        view: view
+      });
+    
+
+
+      //------------------------------------------------Keep working with this part
+      map.on('pointermove', function(evt) {
+        if (evt.dragging) {
+          return;
+        }
+        var pixel = map.getEventPixel(evt.originalEvent);
+        //displayFeatureInfo(pixel);
+      });
+
+      map.on('click', function(evt) {
+        displayFeatureInfo(evt.pixel);
+      });
+
+      var displayFeatureInfo = function(pixel) {
+       var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
+          return feature;
+        });
+
+        
+        if (feature) {
+          alert('name : ' + feature.get('name'));
+        } else {
+          
+        }
+}
+//--------------------------------------------------
+
+
+
+      
+      
+      //I took this function from an ol example and they took it from an opensource github repo so yey copy paste programming
+       // A bounce easing method (from https://github.com/DmitryBaranovskiy/raphael).
+       function bounce(t) {
+        var s = 7.5625, p = 2.75, l;
+        if (t < (1 / p)) {
+          l = s * t * t;
+        } else {
+          if (t < (2 / p)) {
+            t -= (1.5 / p);
+            l = s * t * t + 0.75;
+          } else {
+            if (t < (2.5 / p)) {
+              t -= (2.25 / p);
+              l = s * t * t + 0.9375;
+            } else {
+              t -= (2.625 / p);
+              l = s * t * t + 0.984375;
+            }
+          }
+        }
+        return l;
+      }
+
+
+      // to Bilkent button interaction
+      document.getElementById('Bilkent').addEventListener('click', function() {
+        view.animate({
+          center: fenFakHavuz,
+          duration: 2000,
+          easing: bounce
+        });
+      });
+
+
+      var select = new ol.interaction.Select();//define how to select
+      //selecting buildings
+      if (select !== null) {
+        console.log(select);
+          map.addInteraction(select);
+          select.on('select', function(e) {
+            document.getElementById('status').innerHTML = '&nbsp;' +
+                e.target.getFeatures().getLength() +
+                ' selected features (last operation selected ' + e.selected.length +
+                ' and deselected ' + e.deselected.length + ' features)';
+                
+                
+            //alert(e.target.getFeatures.);
+            
+          });
+          
+        }
+    </script>
+  </body>
+</html>
